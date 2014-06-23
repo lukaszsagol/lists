@@ -2,28 +2,59 @@
  * @jsx React.DOM
  */
 
+var Utils = {
+  uuid: function () {
+    var i, random;
+    var uuid = '';
+
+    for (i = 0; i < 32; i++) {
+      random = Math.random() * 16 | 0;
+      if (i === 8 || i === 12 || i === 16 || i === 20) {
+        uuid += '-';
+      }
+
+      uuid += (i === 12 ? 4 : (i === 16 ? (random & 3 | 8) : random))
+              .toString(16);
+    }
+
+    return uuid;
+  },
+}
+
 window.data = {
   nodes: [{
+    id: Utils.uuid(),
     name: 'Lists TODO',
     nodes: [{
+      id: Utils.uuid(),
       name: '[x] Rendering of nested lists',
       nodes: [{
+        id: Utils.uuid(),
         name: '[x] Just to verify multiple levels of nesting',
         nodes: []
       }]
     },{
+      id: Utils.uuid(),
       name: '[x] Adding new items',
       nodes: []
     },{
+      id: Utils.uuid(),
+      name: '[ ] Saving the state',
+      nodes: []
+    },{
+      id: Utils.uuid(),
       name: '[ ] Indenting/unindenting lists',
       nodes: []
     },{
+      id: Utils.uuid(),
       name: '[ ] Editing current items',
       nodes: []
     }]
   },{
+    id: Utils.uuid(),
     name: 'Second top level list',
     nodes: [{
+      id: Utils.uuid(),
       name: 'Added just in case',
       nodes: []
     }]
@@ -31,12 +62,6 @@ window.data = {
 }
 
 var Item = React.createClass({
-  componentDidMount: function(a) {
-    if (this.props.newNode) {
-      this.refs.inputField.getDOMNode().focus()
-    }
-  },
-
   handleKeypress: function(ev) {
     if (ev.which == 13 && !ev.shiftKey) {
       this.props.addNode()
@@ -49,6 +74,7 @@ var Item = React.createClass({
       <div className="list-item">
         <div className="list-item--name">
           <Editable
+            newItem={this.props.newNode}
             ref="inputField"
             handleKeypress={this.handleKeypress}>
             {this.props.name}
@@ -66,12 +92,15 @@ var Item = React.createClass({
 
 var Editable = React.createClass({
   render: function() {
+    var autofocus = this.props.newItem ? true : null;
+
     return (
-      <div className="editable"
+      <input className="editable"
         onKeyPress={this.props.handleKeypress}
-        contentEditable>
-        {this.props.children}
-      </div>
+        contentEditable
+        autoFocus={autofocus}
+        defaultValue={this.props.children}>
+      </input>
     )
   }
 })
@@ -81,6 +110,7 @@ var Tree = React.createClass({
     var items = this.props.nodes.map(function(item, i) {
       return (
         <Item
+          key={item.id}
           name={item.name}
           nodes={item.nodes}
           newNode={item.newNode}
@@ -122,6 +152,7 @@ var App = React.createClass({
 
   newNode: function() {
     return ({
+      id: Utils.uuid(),
       name: '',
       nodes: [],
       newNode: true
@@ -131,7 +162,7 @@ var App = React.createClass({
   render: function() {
     return (
       <div className="list">
-        <Tree nodes={this.state.data.nodes} addNode={this.addNode}/>
+        <Tree nodes={this.state.data.nodes} addNode={this.addNode} key="root" />
       </div>
     )
   }

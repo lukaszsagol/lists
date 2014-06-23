@@ -1,3 +1,8 @@
 .list-item .list-item {
   padding-left: 20px;
 }
+
+.list-item--name input {
+  border: 0 none;
+  width: 100%;
+}
