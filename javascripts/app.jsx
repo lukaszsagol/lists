@@ -3,43 +3,74 @@
  */
 
 window.data = {
-  tree: [{
+  nodes: [{
     name: 'Lists TODO',
-    children: [{
+    nodes: [{
       name: '[x] Rendering of nested lists',
-      children: [{
+      nodes: [{
         name: '[x] Just to verify multiple levels of nesting',
-        children: []
+        nodes: []
       }]
     },{
-      name: '[ ] Adding new items',
-      children: []
+      name: '[x] Adding new items',
+      nodes: []
     },{
       name: '[ ] Indenting/unindenting lists',
-      children: []
+      nodes: []
     },{
       name: '[ ] Editing current items',
-      children: []
+      nodes: []
     }]
   },{
     name: 'Second top level list',
-    children: [{
+    nodes: [{
       name: 'Added just in case',
-      children: []
+      nodes: []
     }]
   }]
 }
 
 var Item = React.createClass({
+  componentDidMount: function(a) {
+    if (this.props.newNode) {
+      this.refs.inputField.getDOMNode().focus()
+    }
+  },
+
+  handleKeypress: function(ev) {
+    if (ev.which == 13 && !ev.shiftKey) {
+      this.props.addNode()
+      ev.preventDefault()
+    }
+  },
+
   render: function() {
     return (
       <div className="list-item">
         <div className="list-item--name">
-          {this.props.name}
+          <Editable
+            ref="inputField"
+            handleKeypress={this.handleKeypress}>
+            {this.props.name}
+          </Editable>
         </div>
-        <div className="list-item--children">
-          <Tree nodes={this.props.children} />
+        <div className="list-item--nodes">
+          <Tree
+            nodes={this.props.nodes}
+            addNode={this.props.addNode} />
         </div>
+      </div>
+    )
+  }
+})
+
+var Editable = React.createClass({
+  render: function() {
+    return (
+      <div className="editable"
+        onKeyPress={this.props.handleKeypress}
+        contentEditable>
+        {this.props.children}
       </div>
     )
   }
@@ -47,9 +78,14 @@ var Item = React.createClass({
 
 var Tree = React.createClass({
   render: function() {
-    var items = this.props.nodes.map(function(item) {
-      return (<Item name={item.name} children={item.children} />)
-    })
+    var items = this.props.nodes.map(function(item, i) {
+      return (
+        <Item
+          name={item.name}
+          nodes={item.nodes}
+          newNode={item.newNode}
+          addNode={this.props.addNode.bind(null, i)} />)
+    }.bind(this))
 
     return (
       <div className="list-tree">
@@ -68,10 +104,34 @@ var App = React.createClass({
     this.setState({data: window.data})
   },
 
+  addNode: function() {
+    var path = Array.prototype.slice.call(arguments, 0)
+    var position = path.pop()
+
+    var tree = this.state.data
+    var root = tree
+
+    for (i in path) {
+      root = root.nodes[path[i]]
+    }
+
+    root.nodes.splice(position + 1, 0, this.newNode())
+
+    this.setState({data: tree})
+  },
+
+  newNode: function() {
+    return ({
+      name: '',
+      nodes: [],
+      newNode: true
+    })
+  },
+
   render: function() {
     return (
       <div className="list">
-        <Tree nodes={this.state.data.tree} />
+        <Tree nodes={this.state.data.nodes} addNode={this.addNode}/>
       </div>
     )
   }
