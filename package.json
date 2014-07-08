@@ -1,0 +1,22 @@
+{
+  "name": "lists",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Łukasz Sągol",
+  "homepage": "https://github.com/zgryw/lists",
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "^4.2.0",
+    "reactify": "^0.13.1",
+    "watchify": "^0.10.2"
+  },
+  "dependencies": {
+    "envify": "^1.2.1",
+    "react": "^0.10.0"
+  },
+  "scripts": {
+    "build": "./node_modules/.bin/browserify --extension=.jsx -t reactify -o build/ListsApp.js -s ListsApp lib/index.js",
+    "watch": "./node_modules/.bin/watchify --extension=.jsx -t reactify -o build/ListsApp.js -s ListsApp lib/index.js"
+  }
+}
