@@ -4,11 +4,11 @@ var Tree = require("./item").Tree
 
 var Root = React.createClass({
   getInitialState: function() {
-    return ({data: this.props.data})
+    return ({data: {}})
   },
 
   componentWillMount: function() {
-    this.setState({data: this.props.data})
+    this.setState({data: this.props.store.getData()})
   },
 
   addNode: function() {
